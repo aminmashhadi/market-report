@@ -154,7 +154,7 @@ def build_caption(prices):
         "بیت کوین": ("₿","دلار"),
     }
     lines = []
-    lines.append("📊 گزارش روزانه بازارهای جهانی")
+    lines.append("📊 گزارش روزانه بازارهای جهانی 📊")
     lines.append(f"📅 {date_str} | 🕑 ساعت {time_str}")
     lines.append("━━━━━━━━━━━━━━━━━━━━")
     lines.append("")
