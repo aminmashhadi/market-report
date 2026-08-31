@@ -1,6 +1,8 @@
 import requests
 import jdatetime
 import os
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 TOKEN = os.getenv("BOT_TOKEN", "8896230810:AAFg7WJ-SpqDD3lGKR0uKXmUOAfZPt3LlhM")
 CHAT_ID = os.getenv("CHAT_ID", "")
@@ -117,30 +119,44 @@ def fetch_prices():
         }
 
 def build_caption(prices):
-    now = jdatetime.datetime.now()
     try:
-        w = now.strftime("%A")
+        tehran_now = datetime.now(ZoneInfo("Asia/Tehran"))
+        jnow = jdatetime.datetime.fromgregorian(datetime=tehran_now)
+    except:
+        jnow = jdatetime.datetime.now()
+        tehran_now = datetime.now()
+
+    try:
+        w = jnow.strftime("%A")
         en_to_fa = {"Saturday":"شنبه","Sunday":"یکشنبه","Monday":"دوشنبه","Tuesday":"سه‌شنبه","Wednesday":"چهارشنبه","Thursday":"پنجشنبه","Friday":"جمعه"}
         weekday = en_to_fa.get(w, w)
     except:
         weekday = ""
     months = ["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"]
-    date_str = f"{weekday} {now.day} {months[now.month-1]} {now.year}"
+    date_str = f"{weekday} {jnow.day} {months[jnow.month-1]} {jnow.year}"
+
+    event = os.getenv("GITHUB_EVENT_NAME", "")
+    if event == "schedule":
+        time_str = "۱۴:۰۰"
+    else:
+        hh = f"{tehran_now.hour:02d}"
+        mm = f"{tehran_now.minute:02d}"
+        time_str = f"{hh}:{mm}"
+
     meta = {
-        "انس طلای جهانی": ("💰","دلار"),
-        "طلا ۱۸ عیار": ("🪙","تومان"),
-        "سکه امامی": ("🪙","تومان"),
-        "انس نقره جهانی": ("⚪","دلار"),
-        "نقره ۹۹۹ عیار": ("⚪","تومان"),
+        "انس طلای جهانی": ("🥇","دلار"),
+        "طلا ۱۸ عیار": ("🥇","تومان"),
+        "سکه امامی": ("👑","تومان"),
+        "انس نقره جهانی": ("🥈","دلار"),
+        "نقره ۹۹۹ عیار": ("🥈","تومان"),
         "نفت برنت": ("🛢️","دلار"),
         "تتر": ("💵","تومان"),
         "بیت کوین": ("₿","دلار"),
     }
     lines = []
     lines.append("📊 گزارش روزانه بازارهای جهانی")
-    lines.append(f"📅 {date_str} | 🕑 ساعت ۱۴:۰۰")
+    lines.append(f"📅 {date_str} | 🕑 ساعت {time_str}")
     lines.append("━━━━━━━━━━━━━━━━━━━━")
-    lines.append("💡 اعداد داخل پرانتز = درصد تغییر نسبت به دیروز")
     lines.append("")
     for title, (price, change) in prices.items():
         emoji, unit = meta.get(title, ("•",""))
@@ -149,17 +165,20 @@ def build_caption(prices):
         except:
             ch = 0
         if ch > 0:
-            arrow = "🔺"
+            indicator = "🟢 🔺"
+            sign = "+"
         elif ch < 0:
-            arrow = "🔻"
+            indicator = "🔴 🔻"
+            sign = ""
         else:
-            arrow = "➖"
-        sign = "+" if ch > 0 else ""
-        change_fmt = f"{sign}{ch:.2f}%"
-        lines.append(f"{emoji} {title}: {price} {unit}  {arrow} {change_fmt}")
+            indicator = "⚪ ➖"
+            sign = ""
+        change_fmt = f"({sign}{ch:.2f}%)"
+        lines.append(f"{emoji} {title}: {price} {unit}  {indicator} {change_fmt}")
     lines.append("")
     lines.append("━━━━━━━━━━━━━━━━━━━━")
-    lines.append("🔻 کاهش  |  🔺 افزایش  |  ➖ بدون تغییر (نسبت به روز قبل)")
+    lines.append("🔴 کاهش  |  🟢 افزایش  |  ⚪ بدون تغییر")
+    lines.append("🔻📉 افت روزانه  |  🔺📈 رشد روزانه")
     lines.append("منبع: isignal.ir / rahavard365.com")
     return "\n".join(lines)
 
