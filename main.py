@@ -146,7 +146,7 @@ def build_caption(prices):
     meta = {
         "انس طلای جهانی": ("🥇","دلار"),
         "طلا ۱۸ عیار": ("🥇","تومان"),
-        "سکه امامی": ("👑","تومان"),
+        "سکه امامی": ("🥇","تومان"),
         "انس نقره جهانی": ("🥈","دلار"),
         "نقره ۹۹۹ عیار": ("🥈","تومان"),
         "نفت برنت": ("🛢️","دلار"),
@@ -165,21 +165,20 @@ def build_caption(prices):
         except:
             ch = 0
         if ch > 0:
-            indicator = "🟢 🔺"
+            indicator = "⬆️🟢"
             sign = "+"
         elif ch < 0:
-            indicator = "🔴 🔻"
+            indicator = "⬇️🔴"
             sign = ""
         else:
-            indicator = "⚪ ➖"
+            indicator = "⚪️"
             sign = ""
         change_fmt = f"({sign}{ch:.2f}%)"
         lines.append(f"{emoji} {title}: {price} {unit}  {indicator} {change_fmt}")
     lines.append("")
     lines.append("━━━━━━━━━━━━━━━━━━━━")
-    lines.append("🔴 کاهش  |  🟢 افزایش  |  ⚪ بدون تغییر")
-    lines.append("🔻📉 افت روزانه  |  🔺📈 رشد روزانه")
-    lines.append("منبع: isignal.ir / rahavard365.com")
+    lines.append("⬆️🟢 افزایش روزانه  |  ⬇️🔴 کاهش روزانه  |  ⚪️ بدون تغییر روزانه")
+    lines.append("منبع: tgju.org")
     return "\n".join(lines)
 
 def send_fixed_photo(caption):
