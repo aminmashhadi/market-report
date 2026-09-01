@@ -133,7 +133,7 @@ def build_caption(prices):
     except:
         weekday = ""
     months = ["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"]
-    date_str = f"{weekday} {jnow.day} {months[jnow.month-1]} {jnow.year}"
+    date_str = f"{weekday} {jnow.day} {months[jnow.month-1]}"
 
     event = os.getenv("GITHUB_EVENT_NAME", "")
     if event == "schedule":
@@ -143,41 +143,58 @@ def build_caption(prices):
         mm = f"{tehran_now.minute:02d}"
         time_str = f"{hh}:{mm}"
 
-    meta = {
-        "انس طلای جهانی": ("🔸","دلار"),
-        "طلا ۱۸ عیار": ("🔸","تومان"),
-        "سکه امامی": ("🔸","تومان"),
-        "انس نقره جهانی": ("▫️","دلار"),
-        "نقره ۹۹۹ عیار": ("▫️","تومان"),
-        "نفت برنت": ("🛢️","دلار"),
-        "تتر": ("💵","تومان"),
-        "بیت کوین": ("₿","دلار"),
+    short = {
+        "انس طلای جهانی": "انس طلا",
+        "طلا ۱۸ عیار": "طلا ۱۸ عیار",
+        "سکه امامی": "سکه امامی",
+        "انس نقره جهانی": "انس نقره",
+        "نقره ۹۹۹ عیار": "نقره ۹۹۹",
+        "نفت برنت": "نفت برنت",
+        "تتر": "تتر",
+        "بیت کوین": "بیت کوین",
     }
+    emojis = {
+        "انس طلای جهانی": "🥇",
+        "طلا ۱۸ عیار": "🥇",
+        "سکه امامی": "🥇",
+        "انس نقره جهانی": "🥈",
+        "نقره ۹۹۹ عیار": "🥈",
+        "نفت برنت": "🛢️",
+        "تتر": "💵",
+        "بیت کوین": "₿",
+    }
+
     lines = []
-    lines.append("📊 گزارش روزانه بازارهای جهانی 📊")
-    lines.append(f"📅 {date_str} | 🕑 ساعت {time_str}")
-    lines.append("━━━━━━━━━━━━━━━━━━━━")
+    lines.append(f"📊 گزارش بازار  |  {date_str}  |  🕑 {time_str}")
     lines.append("")
     for title, (price, change) in prices.items():
-        emoji, unit = meta.get(title, ("•",""))
+        s = short.get(title, title)
+        emoji = emojis.get(title, "•")
+        unit = "دلار" if "جهانی" in title or "برنت" in title or "بیت" in title else "تومان"
+        if title == "تتر":
+            unit = "تومان"
+        if title == "بیت کوین":
+            unit = "دلار"
         try:
             ch = float(str(change).replace("%",""))
         except:
             ch = 0
         if ch > 0:
-            indicator = "⬆️🟢"
+            ind = "⬆️"
+            col = "🟢"
             sign = "+"
         elif ch < 0:
-            indicator = "⬇️🔴"
+            ind = "⬇️"
+            col = "🔴"
             sign = ""
         else:
-            indicator = "⚪️"
+            ind = "➖"
+            col = "⚪️"
             sign = ""
-        change_fmt = f"({sign}{ch:.2f}%)"
-        lines.append(f"{emoji} {title}: {price} {unit}  {indicator} {change_fmt}")
+        change_fmt = f"{sign}{ch:.2f}%"
+        lines.append(f"{emoji} {s}: {price} {unit} {ind}{col} ({change_fmt})")
     lines.append("")
-    lines.append("━━━━━━━━━━━━━━━━━━━━")
-    lines.append("⬆️🟢 افزایش روزانه  |  ⬇️🔴 کاهش روزانه  |  ⚪️ بدون تغییر روزانه")
+    lines.append("⬆️🟢 افزایش روزانه  |  ⬇️🔴 کاهش روزانه  |  ⚪️ بدون تغییر")
     lines.append("منبع: tgju.org")
     return "\n".join(lines)
 
