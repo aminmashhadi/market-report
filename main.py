@@ -164,9 +164,16 @@ def build_caption(prices):
         "بیت کوین": "₿",
     }
 
-    lines = []
-    lines.append(f"📊 گزارش بازار  |  {date_str}  |  🕑 {time_str}")
-    lines.append("")
+    def fa_digits(value):
+        """Make mixed Persian/Latin content render consistently in RTL clients."""
+        table = str.maketrans("0123456789,.", "۰۱۲۳۴۵۶۷۸۹٬٫")
+        return str(value).translate(table)
+
+    lines = [
+        "📊 گزارش بازار",
+        f"{fa_digits(date_str)} | ساعت {fa_digits(time_str)}",
+        "━━━━━━━━━━━━",
+    ]
     for title, (price, change) in prices.items():
         s = short.get(title, title)
         emoji = emojis.get(title, "•")
@@ -192,10 +199,16 @@ def build_caption(prices):
             col = "⚪️"
             sign = ""
         change_fmt = f"{sign}{ch:.2f}%"
-        lines.append(f"{emoji} {s}: {price} {unit} {ind}{col} ({change_fmt})")
-    lines.append("")
-    lines.append("⬆️🟢 افزایش روزانه  |  ⬇️🔴 کاهش روزانه  |  ⚪️ بدون تغییر")
-    lines.append("منبع: tgju.org")
+        lines.extend([
+            f"{emoji} {s}",
+            f"قیمت: {fa_digits(price)} {unit}",
+            f"تغییر: {fa_digits(change_fmt)} {ind}{col}",
+            "────────────",
+        ])
+    lines.extend([
+        "راهنما: ⬆️🟢 افزایش | ⬇️🔴 کاهش | ➖⚪️ بدون تغییر",
+        "منبع: tgju.org",
+    ])
     return "\n".join(lines)
 
 def send_fixed_photo(caption):
